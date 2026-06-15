@@ -19,7 +19,9 @@ let lightbox = new SimpleLightbox('.gallery a', {
 let currentQuery = '';
 let currentPage = 1;
 let totalHits = 0;
+let loadedImages = 0;
 const PER_PAGE = 40;
+const MAX_PAGES = 3;
 
 searchForm.addEventListener('submit', handleSearch);
 loadMoreBtn.addEventListener('click', handleLoadMore);
@@ -39,6 +41,7 @@ async function handleSearch(event) {
 
   currentQuery = searchQuery;
   currentPage = 1;
+  loadedImages = 0;
   gallery.innerHTML = '';
   hideLoadMore();
   showLoader(loaderContainers[0]);
@@ -57,12 +60,22 @@ async function handleSearch(event) {
     }
 
     totalHits = data.totalHits;
+    loadedImages = data.hits.length;
     const markup = createGalleryMarkup(data.hits);
     gallery.innerHTML = markup;
     lightbox.refresh();
 
-    if (currentPage * PER_PAGE < totalHits) {
+    // Show "Load more" button only if there are more results available and haven't reached max pages
+    if (loadedImages < totalHits && currentPage < MAX_PAGES) {
       showLoadMore();
+    } else {
+      hideLoadMore();
+      if (totalHits > 0) {
+        iziToast.info({
+          message: "We're sorry, but you've reached the end of search results.",
+          position: 'topRight',
+        });
+      }
     }
   } catch (error) {
     console.error(error);
@@ -82,11 +95,25 @@ async function handleLoadMore() {
 
   try {
     const data = await fetchImages(currentQuery, currentPage, PER_PAGE);
+    
+    // If no results returned, we've reached the end
+    if (data.hits.length === 0) {
+      currentPage -= 1; // Revert the page increment since we didn't get results
+      hideLoadMore();
+      iziToast.info({
+        message: "We're sorry, but you've reached the end of search results.",
+        position: 'topRight',
+      });
+      return;
+    }
+    
+    loadedImages += data.hits.length;
     const markup = createGalleryMarkup(data.hits);
     gallery.insertAdjacentHTML('beforeend', markup);
     lightbox.refresh();
 
-    if (currentPage * PER_PAGE >= totalHits) {
+    // Hide the button if we've loaded all available results, got fewer results than requested, or reached max pages
+    if (loadedImages >= totalHits || data.hits.length < PER_PAGE || currentPage >= MAX_PAGES) {
       hideLoadMore();
       iziToast.info({
         message: "We're sorry, but you've reached the end of search results.",
