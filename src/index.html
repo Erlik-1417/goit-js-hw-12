@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Görsel Arama Uygulaması</title>
+    <link rel="stylesheet" href="./css/styles.css" />
+  </head>
+  <body>
+    <load src="./partials/header.html" icon-path="img/sprite.svg#logo" />
+
+    <main>
+      <div class="container">
+        <form class="search-form" id="search-form">
+          <input
+            type="text"
+            name="searchQuery"
+            autocomplete="off"
+            placeholder="Search images..."
+          />
+          <button type="submit">Search</button>
+        </form>
+
+        <div class="loader-container is-hidden">
+          <span class="loader"></span>
+        </div>
+
+        <ul class="gallery"></ul>
+
+        <button type="button" class="load-more is-hidden">Load more</button>
+
+        <div class="loader-container is-hidden">
+          <span class="loader"></span>
+        </div>
+      </div>
+    </main>
+
+    <load src="./partials/footer.html" />
+
+    <script type="module" src="./js/main.js"></script>
+  </body>
+</html>
